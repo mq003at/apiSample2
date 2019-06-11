@@ -3,14 +3,12 @@
 const express = require('express');
 const router = express.Router();
 const Db = require('./db.js');
-let result;
 
 
-// get a list of beacon from db
+// get a list of beacon from db 
 router.get('/beacon/:id', function(req, res, next) {
     Db.findOne({ _id: req.params.id }).then(function(db) { // get the id from request to find the specific database
         res.send(db);
-        result = db;
     });
 });
 
@@ -26,7 +24,6 @@ router.post('/beacon', function(req, res, next) {
         //     store: req.body.store
         db["note"] = 'Please remember your ID.'; // since db is an object, we can add properties here. This doesnt affect our database
         res.send(db);
-        result = db;
     }).catch(next);
 
 }); // Please remember there is semicolon here. Stupid VS code
@@ -39,8 +36,6 @@ router.put('/beacon/:id', function(req, res, next) {
             dbu["status"] = 'updated';
             dbo["status"] = 'outdated'
             res.send(dbu + ";\n" + dbo);
-            result = dbu;
-
         });
     });
 });
@@ -50,11 +45,9 @@ router.delete('/beacon/:id', function(req, res, next) {
     Db.findByIdAndDelete({ _id: req.params.id }).then(function(db) {
         db["note"] = 'This item has been deleted from the database.';
         res.send(db);
-        result = db;
     });
 
 });
 
 // making router as global var
-module.exports = router; // why we cant .exports.router = router ???
-module.exports.result = result;
+module.exports = router;
