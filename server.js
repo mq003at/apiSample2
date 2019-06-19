@@ -2,7 +2,6 @@
 // listen to app request
 var app = require('./app');
 // var fs = require('fs'); // File system to import another file to use it here
-var result = require('./api')
 const router = require('./api');
 const bodyParser = require('body-parser');
 
