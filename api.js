@@ -3,10 +3,11 @@
 const express = require('express');
 const router = express.Router();
 const { Db, Beacon, User } = require('./db.js');
-
+const jwt = require('jsonwebtoken');
+const checkAuth = require('./auth.js')
 
 // get a list of beacon from db 
-router.get('/data/:mac', function(req, res, next) {
+router.get('/data/:mac', checkAuth, function(req, res, next) {
     Db.findOne({ mac: (req.params.mac).toUpperCase() }).then(function(db) { // get the mac from request to find the specific database
         res.send(db);
     });
@@ -60,12 +61,44 @@ router.get('/beacon', function(req, res, next) {
     })
 })
 
-// routing for user collection
-router.get('/user/:name', function(req, res, next) {
-    User.findOne({ name: req.params.name }).then(function(user) { // get the mac from request to find the specific database
-        res.send(user);
-    });
+// routing for user management
+// user login in
+router.post('/login', function(req, res, next) {
+    User.find({ email: req.body.email }).then(function(user) {
+        if (user.length < 1) { // error handler not finding mail
+            return res.status(404).json({ message: "Mail not found!" })
+        } else {
+            const token = jwt.sign({ // jwt 
+                email: user.email,
+                userId: user._id
+
+            }, process.env.JWT_KEY || "secret", {
+                expiresIn: "1h"
+            });
+            return res.status(200).json({
+                message: "Auth successful",
+                token: token
+            })
+        }
+    })
 });
+
+// This part is to create user. Normally we will create user on our own database, and give the end-user id passoword.
+
+// router.post('/signup', (req, res, next) => {
+//     User.find({ email: req.body.email }).exec().then(user => {
+//         if (user.length >= 1) { // even when it can't find entry in db, it returns emty array
+//             return res.status(409).json({
+//                 message: 'Email is already existed.'
+//             });
+//         } else {
+//             User.create(req.body).then(function(user) {
+//                 user["note"] = 'User added.'
+//                 res.send(user);
+//             })
+//         }
+//     })
+// })
 
 // making router as global var
 module.exports = router;

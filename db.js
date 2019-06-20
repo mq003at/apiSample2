@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-mongoose.connect('mongodb://localhost/testDb1', { useNewUrlParser: true });
+mongoose.connect(process.env.MONGODB || 'mongodb://localhost/testDb1', { useNewUrlParser: true });
 mongoose.Promise = global.Promise; // globalize mongoose
 mongoose.set('useFindAndModify', false);
 
@@ -76,17 +76,29 @@ const dbSchema2 = new Schema({
     collection: 'beacon'
 });
 
-var UserSchema = new mongoose.Schema({
+var UserSchema = new mongoose.Schema({ // userschema for signup and login
     name: String,
     email: {
         type: String,
-        validate: [checkAt, 'Email is not correctly typed in.']
+        validate: [checkAt, 'Email is not correctly typed in.'],
+        required: [true, 'You have to type a corrected email.'],
+        unique: true,
+        match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|museum)\b/
+
+
     },
     phone: {
         type: String,
         validate: [checkPhone, 'Phone is not correctly typed in.']
     },
-    password: String
+    password: {
+        type: String,
+        required: [true, 'You have to type a corrected password']
+    },
+    note: {
+        type: String,
+        required: false
+    }
 }, {
     collection: 'user'
 });
