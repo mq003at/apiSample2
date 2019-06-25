@@ -7,14 +7,14 @@ const jwt = require('jsonwebtoken');
 const checkAuth = require('./auth.js')
 
 // get a list of beacon from db 
-router.get('/data/:mac', checkAuth, function(req, res, next) {
-    Db.findOne({ mac: (req.params.mac).toUpperCase() }).then(function(db) { // get the mac from request to find the specific database
+router.get('/data/:mac', function(req, res, next) {
+    Db.find({ mac: (req.params.mac).toUpperCase() }).then(function(db) { // get the mac from request to find the specific database
         res.send(db);
     });
 });
 
 // add something to db
-router.post('/data/', function(req, res, next) {
+router.post('/data/', checkAuth, function(req, res, next) {
     // var db = new Db(req.body); // create an instance using schema and user request
     // db.save();                  // save it to db
     Db.create(req.body).then(function(db) { //save db then create an obj base on what user sent
@@ -30,7 +30,7 @@ router.post('/data/', function(req, res, next) {
 }); // Please remember there is semicolon here. Stupid VS code
 
 // update something in the db
-router.put('/data/:id', function(req, res, next) {
+router.put('/data/:id', checkAuth, function(req, res, next) {
     Db.findByIdAndUpdate({ _id: req.params.id }, req.body).then(function(dbo) { // this is the update syntax
         Db.findOne({ _id: req.params.id }).then(function(dbu) { // this is our api retrieving the updated data to show them to user
             dbu["note"] = 'This item has been updated from the database.';
@@ -51,7 +51,7 @@ router.delete('/data/:id', function(req, res, next) {
 });
 
 // routing for the beacon collection
-router.get('/beacon', function(req, res, next) {
+router.get('/beacon', checkAuth, function(req, res, next) {
     Beacon.find({}, function(err, beacon) {
         if (err) {
             res.send('Something is very wrong here. Contact the devs for more infos.')
